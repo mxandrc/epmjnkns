@@ -1,6 +1,6 @@
 def CONTAINER_NAME = "epmjnkns-pipeline"
 def CONTAINER_TAG = "latest"
-def DOCKER_HUB_USER = "andruhan"
+def DOCKER_HUB_USER = "mxandrc"
 def APP_HTTP_PORT = "5050"
 
 node {
@@ -28,7 +28,7 @@ node {
     }
 
     stage('Image Test') {
-        sh "docker run -d --rm -p $APP_HTTP_PORT:$APP_HTTP_PORT --name $CONTAINER_NAME $DOCKER_HUB_USER/$CONTAINER_NAME:$CONTAINER_TAG"
+        sh "docker run -d --rm -p $APP_HTTP_PORT:$APP_HTTP_PORT --name $CONTAINER_NAME $CONTAINER_NAME/$CONTAINER_NAME:$CONTAINER_TAG"
         sleep 5
         APP_IP_ADDR = sh(returnStdout: true, script: "docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'")
         APP_IP_ADDR = APP_IP_ADDR.trim()
@@ -41,10 +41,10 @@ node {
     }
 
     stage('Push to Docker Registry') {
-        withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+        withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', passwordVariable: 'PASSWORD', usernameVariable: 'USER_NAME')]) {
             sh "docker login -u $DOCKER_HUB_USER -p $PASSWORD"
             sh "docker tag $CONTAINER_NAME:$CONTAINER_TAG $DOCKER_HUB_USER/$CONTAINER_NAME:$CONTAINER_TAG"
-            sh "docker push $DOCKER_HUB_USER/$CONTAINER_NAME:$CONTAINER_TAG"
+            sh "docker push $CONTAINER_NAME:$CONTAINER_TAG"
             echo "Image push complete"
         }
     }
